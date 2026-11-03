@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickSplit — Minimalist Expense Splitter</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <main class="app-card">
+    <header class="header">
+      <div class="logo-row">
+        <span class="logo-emoji">⚡</span>
+        <div>
+          <h1 class="title">QuickSplit</h1>
+          <p class="subtitle">Automatic Debt Cancellation</p>
+        </div>
+      </div>
+      <button  id="btnReset" class="btn-reset" title="Reset all data">Reset</button>
+    </header>
+
+    <div id="paymentBanner" class="payment-banner hidden">
+      <div class="payment-banner-content">
+        <span id="paymentBannerIcon" class="payment-banner-icon"></span>
+        <span id="paymentBannerText" class="payment-banner-text"></span>
+      </div>
+      <button type="button" id="btnCloseBanner" class="btn-close-banner">&times;</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title-row">
+        <label class="label mb-0">1. Group Participants</label>
+        <span id="groupMemberCountBadge" class="badge-pill">0 Members</span>
+      </div>
+
+      <form id="formAddParticipant" class="add-participant-row">
+        <input type="text" id="inputParticipantName" class="input-text" placeholder="Enter name (e.g. Alice)" required>
+        <button type="submit" id="btnAddParticipant" class="btn btn-secondary"> Add</button>
+      </form>
+
+      <div id="participantsList" class="members-chips"></div>
+
+      <div id="participantWarning" class="participant-notice hidden">
+        <span id="participantWarningText"></span>
+        <button type="button" id="btnCloseParticipantWarning" class="btn-close-notice">&times;</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2 class="subheading">2. Add Expense</h2>
+
+      <div id="minParticipantsNotice" class="warning-banner hidden">
+        ⚠️ Add at least 2 participants above to start splitting expenses.
+      </div>
+
+      <form id="formExpense" class="expense-form">
+        <div class="form-row">
+          <div class="input-col">
+            <label for="expenseAmount" class="label">Amount (₹)</label>
+            <input type="number" id="expenseAmount" class="input-text" placeholder="0.00" step="0.01" min="0.01" required>
+          </div>
+          <div class="input-col">
+            <label for="expensePayer" class="label">Paid By</label>
+            <select id="expensePayer" class="input-select" required></select>
+          </div>
+        </div>
+
+        <div class="split-section">
+          <div class="split-header">
+            <span class="label mb-0">Split Equally Among:</span>
+            <div class="split-actions">
+              <button type="button" id="btnSelectAll" class="btn-link">Select All</button>
+              <span class="action-divider">•</span>
+              <button type="button" id="btnClearAll" class="btn-link">Clear</button>
+            </div>
+          </div>
+
+          <div id="participantChipsContainer" class="chips-grid"></div>
+
+          <div id="splitLivePreview" class="split-live-preview"></div>
+        </div>
+
+        <button type="submit" id="btnSubmitExpense" class="btn-add"> Add Expense</button>
+      </form>
+    </div>
+
+    <div class="summary-box">
+      <div class="summary-item">
+        <span class="summary-label">Total Spent</span>
+        <span id="statTotal" class="summary-val">₹0.00</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item">
+        <span class="summary-label">Active Expenses</span>
+        <span id="statCount" class="summary-val">0</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title-row">
+        <h2 class="subheading">Who Owes Whom</h2>
+        <span class="badge-pill">Auto-Canceled</span>
+      </div>
+
+      <div id="settledBanner" class="settled-banner hidden">
+        ✨ All settled up! All debts canceled or paid.
+      </div>
+
+      <div id="debtsList" class="debts-list"></div>
+    </div>
+
+    <div class="section">
+      <h2 class="subheading">Expense Log</h2>
+
+      <div id="emptyHistory" class="empty-state hidden">
+        No expenses logged yet.
+      </div>
+
+      <div id="historyList" class="history-list"></div>
+    </div>
+  </main>
+
+  <template id="tmplParticipantBadge">
+    <div class="member-chip">
+      <span class="member-name"></span>
+      <button type="button" class="btn-remove-member" title="Remove participant">&times;</button>
+    </div>
+  </template>
+
+  <template id="tmplChip">
+    <button type="button" class="person-chip">
+      <span class="chip-icon"></span>
+      <span class="chip-label"></span>
+    </button>
+  </template>
+
+  <template id="tmplDebt">
+    <div class="debt-card">
+      <div class="debt-info">
+        <div class="debt-actors">
+          <span class="debtor"></span>
+          <span>owes</span>
+          <span class="creditor"></span>
+        </div>
+        <span class="debt-amount"></span>
+      </div>
+      <button type="button" class="btn-pay-cashfree">Pay via Cashfree</button>
+    </div>
+  </template>
+
+  <template id="tmplHistory">
+    <div class="history-item">
+      <div class="history-desc">
+        <span class="history-title"></span>
+        <span class="history-sub"></span>
+      </div>
+      <div class="history-right">
+        <span class="history-amount"></span>
+        
+      </div>
+    </div>
+  </template>
+
+  <template id="tmplOption">
+    <option></option>
+  </template>
+
+  <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
